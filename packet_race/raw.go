@@ -10,16 +10,18 @@ import (
 	"time"
 )
 
-func rawsocket() {
+func Rawsocket() int {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
 	if err != nil {
 		log.Fatalf("Failed to create raw socket: %v", err)
+		return 0
 	}
 	defer syscall.Close(fd)
 
 	// Set options: here, we enable IP_HDRINCL to manually include the IP header
 	if err := syscall.SetsockoptInt(fd, syscall.IPPROTO_IP, syscall.IP_HDRINCL, 1); err != nil {
 		log.Fatalf("Failed to set IP_HDRINCL: %v", err)
+		return 0
 	}
 
 	config, err := NewPacketConfig(
@@ -29,17 +31,19 @@ func rawsocket() {
 	)
 	if err != nil {
 		fmt.Println("error configuring packet: %v", err)
+		return 0
 	}
 	packet, err := BuildPacket(config)
 	if err != nil {
 		fmt.Println("failed to build packet: %w", err)
+		return 0
 	}
 
 	dstaddr := &syscall.SockaddrInet4{
 		Port: 8080,
 		Addr: [4]byte{127, 0, 0, 1},
 	}
-	//buf := getTestMsg()
+
 	total := 0
 
 	timerCh := time.After(1 * time.Second)
@@ -53,14 +57,14 @@ func rawsocket() {
 			fmt.Println("Server shutting down due to timeout...")
 			fmt.Printf("Total Packets Sent: %d\n", total)
 			syscall.Close(fd)
-			return
+			return total
 
 		case sig := <-signalCh:
 			// If termination signal received, print the final counter value and shutdown the server
 			fmt.Printf("Received signal %s. Shutting down...\n", sig)
 			fmt.Printf("Total Packets sent: %d\n", total)
 			syscall.Close(fd)
-			return
+			return total
 
 		default:
 			err := syscall.Sendto(fd, packet, 0, dstaddr)

@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-func NewAFinet() {
+func NewAFinet() int {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_IP)
 
 	if err != nil {
 		fmt.Println("1", err)
-		return
+		return 0
 	}
 
 	addr := &syscall.SockaddrInet4{
@@ -30,18 +30,18 @@ func NewAFinet() {
 	for {
 		select {
 		case <-timerCh:
-			// If 8 seconds elapsed, print the final counter value and shutdown the server
+			// If 1 second elapsed, print the final counter value and shutdown the server
 			fmt.Println("Server shutting down due to timeout...")
 			fmt.Printf("Total Packets Sent: %d\n", total)
 			syscall.Close(fd)
-			return
+			return total
 
 		case sig := <-signalCh:
 			// If termination signal received, print the final counter value and shutdown the server
 			fmt.Printf("Received signal %s. Shutting down...\n", sig)
 			fmt.Printf("Total Packets sent: %d\n", total)
 			syscall.Close(fd)
-			return
+			return total
 
 		default:
 			err := syscall.Sendto(fd, buf, 0, addr)

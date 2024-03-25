@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Udpserver() {
+func Udpserver() int {
 	addra := &net.UDPAddr{
 		IP:   []byte{127, 0, 0, 1},
 		Port: 8080,
@@ -18,9 +18,8 @@ func Udpserver() {
 	fd, err := net.DialUDP("udp", nil, addra)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 0
 	}
-
 	fmt.Println("the sever is live")
 
 	total := 0
@@ -38,13 +37,13 @@ func Udpserver() {
 			fmt.Println("Server shutting down due to timeout...")
 			fmt.Printf("Total Packets Sent: %d\n", total)
 			fd.Close()
-			return
+			return total
 		case sig := <-signalCh:
 			// If termination signal received, print the final counter value and shutdown the server
 			fmt.Printf("Received signal %s. Shutting down...\n", sig)
 			fmt.Printf("Total Packets Sent : %d\n", total)
 			fd.Close()
-			return
+			return total
 		default:
 
 			_, err := fd.Write(buf)
@@ -53,11 +52,7 @@ func Udpserver() {
 				continue
 			}
 			total++
-
 		}
-
-		//defer println("total message recieved", total)
-
 	}
 
 }

@@ -108,8 +108,7 @@ func BuildPacket(c *PacketConfig) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// htons converts a uint16 from host- to network byte order.
-
-func htons(i uint16) uint16 {
-	return (i<<8)&0xff00 | i>>8
+// converts a uint16 from host- to network byte order.
+func tonet(u uint16) uint16 {
+	return (u<<8)&0xff00 | u>>8
 }
