@@ -1,6 +1,6 @@
 # Packet racer
 A CLI project demonstrating packet transfer speed of various UDP (User Datagram Protocol) techniques.
-This includes `net.Dial`, `AF_INET`, `AF_INET raw socket`, `AF_PACKET` methods.
+This includes `net.Dial`, `AF_INET`, `AF_INET raw socket`, `AF_PACKET` methods. It then compares the performance of each method in terms of number of packets transferred and Mega Bytes transferred and arranges them in descending order.
 
 ## Build It Locally
 
@@ -19,14 +19,21 @@ cd packet_racer
 go build -o packet
 ```
 
-Now You can run the binary within the folder with or without flags 
+Now You can run the binary within the folder with or without flags li
 ```
-./packet
+sudo ./packet
 ```
+Root privileges are required to run the binary, since certain methods within the project require root permissions.
 
 To run the program globally add the binary to your globally path
 
 ## Functionality Available
+
+### Optional Flags
+- `-duration` : allows you to change the duration for which each method runs. By default this value is set to `1 Second`
+- `-port` : allows the user to change the port at which the listening server spins off/ By default this value is set to `8080`
+- `-size` : allows you to change the size of packets being sent across in the udp connection. By default it has its value set to `1470 bytes`
+
 
 
 ## About
