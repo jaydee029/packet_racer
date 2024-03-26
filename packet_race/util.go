@@ -30,7 +30,7 @@ func NewPacketConfig(opts ...PacketOption) (*PacketConfig, error) {
 
 func getTestMsg() []byte {
 	// Generate a 1500 byte random message
-	buf := make([]byte, 1485)
+	buf := make([]byte, 1470)
 	_, err := rand.Read(buf)
 	if err != nil {
 		panic(err)
@@ -63,7 +63,13 @@ func WithPayloadSize(size int) PacketOption {
 		return nil
 	}
 }
-
+func WithEthernetLayer(srcMAC, dstMAC net.HardwareAddr) PacketOption {
+	return func(c *PacketConfig) error {
+		c.SrcMAC = srcMAC
+		c.DstMAC = dstMAC
+		return nil
+	}
+}
 func BuildPacket(c *PacketConfig) ([]byte, error) {
 	buf := gopacket.NewSerializeBuffer()
 	var layersToSerialize []gopacket.SerializableLayer

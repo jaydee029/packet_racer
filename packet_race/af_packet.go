@@ -32,10 +32,10 @@ func Afpacket() int {
 	// Construct the packet once outside the loop
 	// create a packet configuration
 	config, err := NewPacketConfig(
-		//packet.WithEthernetLayer(s.srcMAC, s.dstMAC),
+		WithEthernetLayer(net.HardwareAddr{0xde, 0xad, 0xbe, 0xef, 0xca, 0xfe}, net.HardwareAddr{0xc0, 0xff, 0xee, 0x00, 0x00, 0x00}),
 		WithIpLayer(net.IP{127, 0, 0, 1}, net.IP{127, 0, 0, 1}),
 		WithUdpLayer(8081, 8080),
-		//packet.WithPayloadSize(1490),
+		//WithPayloadSize(1490),
 	)
 	if err != nil {
 		fmt.Errorf("error configuring packet: %v", err)

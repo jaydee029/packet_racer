@@ -20,16 +20,11 @@ type Commands struct {
 
 var cmd *exec.Cmd
 
-type count struct {
-	packets int
-	Mbs     int
-}
-
 func Mb(i int) int {
 	return (i * 1485) / (1024 * 1024)
 }
 
-func stats(c *Commands) map[string]count {
+func stats(c *Commands) {
 	keys := make([]string, 0, 4)
 
 	for k, _ := range c.total {
@@ -40,21 +35,14 @@ func stats(c *Commands) map[string]count {
 		return c.total[keys[i]] > c.total[keys[j]]
 	})
 
-	for _, k := range keys {
-		println(k)
-	}
-
-	out := make(map[string]count, 4)
+	fmt.Println("*--------------------------------------------------------------*")
+	fmt.Println("|UDP  METHOD |Packets Transfered|Mega Bytes Transfered|")
 
 	for _, k := range keys {
-		out[k] = count{
-			packets: c.total[k],
-			Mbs:     Mb(c.total[k]),
-		}
-
+		fmt.Printf("|%s|%v|%v|\n", k, c.total[k], Mb(c.total[k]))
 	}
 
-	return out
+	fmt.Println("*--------------------------------------------------------------*")
 
 }
 
@@ -93,15 +81,6 @@ func (c *Commands) server() {
 	}
 }
 
-func (c *Commands) print(out map[string]count) {
-	fmt.Println("*--------------------------------------------------------------*")
-	fmt.Println("|UDP  METHOD |Packets Transfered|Mega Bytes Transfered|")
-	for i, k := range out {
-		fmt.Printf("|%s|%v|%v|\n", i, k.packets, k.Mbs)
-	}
-	fmt.Println("*--------------------------------------------------------------*")
-}
-
 func cli() {
 	inptime := flag.Int("duration", 1, "duration for each method")
 	inpsize := flag.Int("size", 1485, "size of each packet in bytes")
@@ -120,13 +99,11 @@ func cli() {
 
 	time.Sleep(2 * time.Second)
 
-	c.total["udp"] = packet.Udpserver()
-	c.total["afinet"] = packet.NewAFinet()
-	c.total["afpacket"] = packet.Afpacket()
-	c.total["socket"] = packet.Rawsocket()
+	c.total["net.dial  "] = packet.Udpserver()
+	c.total["AF inet   "] = packet.NewAFinet()
+	c.total["AF packet "] = packet.Afpacket()
+	c.total["Raw socket"] = packet.Rawsocket()
 
-	output := stats(c)
-
-	c.print(output)
+	stats(c)
 
 }
