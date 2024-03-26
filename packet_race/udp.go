@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-func Udpserver() int {
+func Udpserver(c *Commands) int {
 	addra := &net.UDPAddr{
 		IP:   []byte{127, 0, 0, 1},
-		Port: 8080,
+		Port: c.Port,
 	}
 
 	fd, err := net.DialUDP("udp", nil, addra)
@@ -23,12 +23,12 @@ func Udpserver() int {
 	fmt.Println("the sever is live")
 
 	total := 0
-	buf := getTestMsg()
+	buf := getMsg(c.Size)
 
 	// Create a channel to listen for termination signals
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
-	timerCh := time.After(1 * time.Second)
+	timerCh := time.After(time.Duration(c.Time) * time.Second)
 
 	for {
 		select {

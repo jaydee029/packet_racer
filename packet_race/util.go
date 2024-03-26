@@ -17,6 +17,13 @@ type PacketConfig struct {
 }
 type PacketOption func(*PacketConfig) error
 
+type Commands struct {
+	Time  int
+	Size  int
+	Port  int
+	Total map[string]int
+}
+
 func NewPacketConfig(opts ...PacketOption) (*PacketConfig, error) {
 	config := &PacketConfig{}
 
@@ -28,9 +35,9 @@ func NewPacketConfig(opts ...PacketOption) (*PacketConfig, error) {
 	return config, nil
 }
 
-func getTestMsg() []byte {
+func getMsg(size int) []byte {
 	// Generate a 1500 byte random message
-	buf := make([]byte, 1470)
+	buf := make([]byte, size)
 	_, err := rand.Read(buf)
 	if err != nil {
 		panic(err)
@@ -70,7 +77,7 @@ func WithEthernetLayer(srcMAC, dstMAC net.HardwareAddr) PacketOption {
 		return nil
 	}
 }
-func BuildPacket(c *PacketConfig) ([]byte, error) {
+func BuildPacket(c *PacketConfig, size int) ([]byte, error) {
 	buf := gopacket.NewSerializeBuffer()
 	var layersToSerialize []gopacket.SerializableLayer
 
@@ -101,7 +108,7 @@ func BuildPacket(c *PacketConfig) ([]byte, error) {
 	udpLayer.SetNetworkLayerForChecksum(ipLayer) // Important for checksum calculation
 	layersToSerialize = append(layersToSerialize, udpLayer)
 
-	payload := getTestMsg() //make([]byte, c.PayloadSize)
+	payload := getMsg(size) //make([]byte, c.PayloadSize)
 
 	// Optionally, fill the payload with data
 	layersToSerialize = append(layersToSerialize, gopacket.Payload(payload))

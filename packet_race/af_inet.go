@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func NewAFinet() int {
+func NewAFinet(c *Commands) int {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_IP)
 
 	if err != nil {
@@ -18,12 +18,12 @@ func NewAFinet() int {
 
 	addr := &syscall.SockaddrInet4{
 		Addr: [4]byte{127, 0, 0, 1},
-		Port: 8080,
+		Port: c.Port,
 	}
-	buf := getTestMsg()
+	buf := getMsg(c.Size)
 	total := 0
 
-	timerCh := time.After(1 * time.Second)
+	timerCh := time.After(time.Duration(c.Time) * time.Second)
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Afpacket() int {
+func Afpacket(c *Commands) int {
 
 	fd, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, int(tonet(syscall.ETH_P_IP)))
 	if err != nil {
@@ -34,7 +34,7 @@ func Afpacket() int {
 	config, err := NewPacketConfig(
 		WithEthernetLayer(net.HardwareAddr{0xde, 0xad, 0xbe, 0xef, 0xca, 0xfe}, net.HardwareAddr{0xc0, 0xff, 0xee, 0x00, 0x00, 0x00}),
 		WithIpLayer(net.IP{127, 0, 0, 1}, net.IP{127, 0, 0, 1}),
-		WithUdpLayer(8081, 8080),
+		WithUdpLayer(8081, c.Port),
 		//WithPayloadSize(1490),
 	)
 	if err != nil {
@@ -42,7 +42,7 @@ func Afpacket() int {
 		return 0
 	}
 	// build the packet
-	packet, err := BuildPacket(config)
+	packet, err := BuildPacket(config, c.Size)
 	if err != nil {
 		fmt.Errorf("failed to build packet: %w", err)
 		return 0
@@ -50,7 +50,7 @@ func Afpacket() int {
 
 	total := 0
 
-	timerCh := time.After(1 * time.Second)
+	timerCh := time.After(time.Duration(c.Time) * time.Second)
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 

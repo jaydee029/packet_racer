@@ -21,26 +21,44 @@ type Commands struct {
 var cmd *exec.Cmd
 
 func Mb(i int) int {
-	return (i * 1485) / (1024 * 1024)
+	return (i * 1470) / (1024 * 1024)
 }
 
-func stats(c *Commands) {
+func spaces(packets, length int) {
+	for i := 0; i <= length-packets; i++ {
+		fmt.Printf(" ")
+	}
+	fmt.Printf("|")
+}
+
+func stats(c *packet.Commands) {
 	keys := make([]string, 0, 4)
 
-	for k, _ := range c.total {
+	for k, _ := range c.Total {
 		keys = append(keys, k)
 	}
 
 	sort.SliceStable(keys, func(i int, j int) bool {
-		return c.total[keys[i]] > c.total[keys[j]]
+		return c.Total[keys[i]] > c.Total[keys[j]]
 	})
 
 	fmt.Println("*--------------------------------------------------------------*")
+	fmt.Println()
 	fmt.Println("|UDP  METHOD |Packets Transfered|Mega Bytes Transfered|")
+	fmt.Println()
 
 	for _, k := range keys {
-		fmt.Printf("|%s|%v|%v|\n", k, c.total[k], Mb(c.total[k]))
+		p := fmt.Sprintf("%s", c.Total[k])
+		m := fmt.Sprintf("%s", Mb(c.Total[k]))
+		fmt.Printf("|%s|%v", k, c.Total[k])
+		spaces(len(p), 26)
+		fmt.Printf("%v", Mb(c.Total[k]))
+		spaces(len(m), 29)
+		fmt.Println()
 	}
+	fmt.Println()
+
+	fmt.Printf("Port used for server:%v\nSize of each Packet(in bytes):%v\nDuration of each method:%v\n", c.Port, c.Size, c.Time)
 
 	fmt.Println("*--------------------------------------------------------------*")
 
@@ -60,7 +78,7 @@ func stopNetcat() {
 	fmt.Println("Server stopped.")
 }
 
-func (c *Commands) server() {
+func server(c *packet.Commands) {
 	cmd = exec.Command("nc", "-ul", "8080")
 
 	if err := cmd.Start(); err != nil {
@@ -68,9 +86,10 @@ func (c *Commands) server() {
 		return
 	}
 
-	fmt.Printf("Listening at %v.", c.port)
+	fmt.Printf("Listening at %v.", c.Port)
 
-	duration := 10 * time.Second
+	total_duration := (c.Time*4 + 5)
+	duration := time.Duration(total_duration) * time.Second
 	time.AfterFunc(duration, func() {
 		stopNetcat()
 	})
@@ -81,28 +100,28 @@ func (c *Commands) server() {
 	}
 }
 
-func cli() {
+func Cli() {
 	inptime := flag.Int("duration", 1, "duration for each method")
-	inpsize := flag.Int("size", 1485, "size of each packet in bytes")
+	inpsize := flag.Int("size", 1470, "size of each packet in bytes")
 	inpport := flag.Int("port", 8080, "port number")
 
 	flag.Parse()
 
-	c := &Commands{
-		time:  *inptime,
-		size:  *inpsize,
-		port:  *inpport,
-		total: map[string]int{},
+	c := &packet.Commands{
+		Time:  *inptime,
+		Size:  *inpsize,
+		Port:  *inpport,
+		Total: map[string]int{},
 	}
 
-	go c.server()
+	go server(c)
 
 	time.Sleep(2 * time.Second)
 
-	c.total["net.dial  "] = packet.Udpserver()
-	c.total["AF inet   "] = packet.NewAFinet()
-	c.total["AF packet "] = packet.Afpacket()
-	c.total["Raw socket"] = packet.Rawsocket()
+	c.Total["net.dial    "] = packet.Udpserver(c)
+	c.Total["AF inet     "] = packet.NewAFinet(c)
+	c.Total["AF packet   "] = packet.Afpacket(c)
+	c.Total["Raw socket  "] = packet.Rawsocket(c)
 
 	stats(c)
 

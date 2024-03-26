@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func Rawsocket() int {
+func Rawsocket(c *Commands) int {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
 	if err != nil {
 		log.Fatalf("Failed to create raw socket: %v", err)
@@ -26,14 +26,14 @@ func Rawsocket() int {
 
 	config, err := NewPacketConfig(
 		WithIpLayer(net.IP{127, 0, 0, 1}, net.IP{127, 0, 0, 1}),
-		WithUdpLayer(int(8081), int(8080)),
+		WithUdpLayer(int(8081), int(c.Port)),
 		WithPayloadSize(1500),
 	)
 	if err != nil {
 		fmt.Println("error configuring packet: %v", err)
 		return 0
 	}
-	packet, err := BuildPacket(config)
+	packet, err := BuildPacket(config, c.Size)
 	if err != nil {
 		fmt.Println("failed to build packet: %w", err)
 		return 0
@@ -46,7 +46,7 @@ func Rawsocket() int {
 
 	total := 0
 
-	timerCh := time.After(1 * time.Second)
+	timerCh := time.After(time.Duration(c.Time) * time.Second)
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
