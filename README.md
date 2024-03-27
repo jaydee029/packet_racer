@@ -34,6 +34,10 @@ To run the program globally add the binary to your globally path
 - `-port` : allows the user to change the port at which the listening server spins off/ By default this value is set to `8080`
 - `-size` : allows you to change the size of packets being sent across in the udp connection. By default it has its value set to `1470 bytes`
 
+### How It Works
+The program uses netcat to start the listening server at the given Port, the server runs for some given time, The udp methods are invoked synchronously on the same listener server, once the connnection is established the transfer of IP packets begin.
+
+- `The UDP Method`: 
 
 
 ## About
