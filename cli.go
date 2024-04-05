@@ -88,7 +88,7 @@ func server(c *packet.Commands) {
 
 	fmt.Printf("Listening at %v.", c.Port)
 
-	total_duration := (c.Time*4 + 5)
+	total_duration := (c.Time*4 + 6)
 	duration := time.Duration(total_duration) * time.Second
 	time.AfterFunc(duration, func() {
 		stopNetcat()
