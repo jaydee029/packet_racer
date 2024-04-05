@@ -2,6 +2,8 @@
 A CLI project demonstrating packet transfer speed of various UDP (User Datagram Protocol) techniques.
 This includes `net.Dial`, `AF_INET`, `AF_INET raw socket`, `AF_PACKET` methods. It then compares the performance of each method in terms of number of packets transferred and Mega Bytes transferred and arranges them in descending order.
 
+![test](https://github.com/jaydee029/packet_racer/blob/main/assets/packettest.jpg)
+
 ## Build It Locally
 
 Pre Requisites
